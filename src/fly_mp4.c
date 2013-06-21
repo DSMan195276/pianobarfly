@@ -57,6 +57,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <linux/limits.h>
 
 #include "fly.h"
 #include "fly_mp4.h"
@@ -1902,8 +1903,7 @@ int BarFlyMp4TagWrite(BarFlyMp4Tag_t* tag, BarSettings_t const* settings)
 	size_t audio_buf_size;
 	size_t read_count;
 	size_t write_count;
-	char tmp_file_path[L_tmpnam];
-	char* junk;
+	char tmp_file_path[PATH_MAX];
 	size_t atom_size;
 	BarFlyMp4Atom_t* atom;
 
@@ -1912,12 +1912,10 @@ int BarFlyMp4TagWrite(BarFlyMp4Tag_t* tag, BarSettings_t const* settings)
 
 	/*
 	 * Open the tmp file.
-	 *
-	 * Assigning the return value of tmpnam() to a junk pointer to get the
-	 * compiler to be quiet.
 	 */
-	junk = tmpnam(tmp_file_path);
-	junk = junk;
+  tmp_file_path[0] = '\0';
+	strcat (tmp_file_path, tag->file_path);
+	strcat (tmp_file_path, ".pt");
 	tmp_file = fopen(tmp_file_path, "wb");
 	if (tmp_file == NULL) {
 		BarUiMsg(settings, MSG_ERR,

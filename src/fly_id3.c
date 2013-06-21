@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <linux/limits.h>
 
 #include "fly.h"
 #include "fly_id3.h"
@@ -235,8 +236,7 @@ int BarFlyID3WriteFile(char const* file_path, struct id3_tag const* tag,
 	FILE* audio_file = NULL;
 	FILE* tmp_file = NULL;
 	uint8_t audio_buffer[BAR_FLY_COPY_BLOCK_SIZE];
-	char tmp_file_path[L_tmpnam];
-	char* junk;
+	char tmp_file_path[PATH_MAX];
 	size_t read_count;
 	size_t write_count;
 
@@ -286,12 +286,10 @@ int BarFlyID3WriteFile(char const* file_path, struct id3_tag const* tag,
 
 	/*
 	 * Open the tmp file.
-	 *
-	 * Assigning the return value of tmpnam() to a junk pointer to get the
-	 * compiler to be quiet.
 	 */
-	junk = tmpnam(tmp_file_path);
-	junk = junk;
+	tmp_file_path[0] = '\0';
+	strcat (tmp_file_path, file_path);
+	strcat (tmp_file_path, ".pt");
 	tmp_file = fopen(tmp_file_path, "w+b");
 	if (tmp_file == NULL) {
 		BarUiMsg(settings, MSG_ERR, "Could not open the temporary file (%s) "
